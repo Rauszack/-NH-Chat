@@ -1,0 +1,61 @@
+<div class="container-cyber">
+  <div class="toolbar">
+ <img class="logo-img" src="/img/logo.jpg" alt="Logo" />
+    <h1 class="title">Organizador de vicio</h1>
+    <h1 class="logo">[NH]</h1>    
+    <div class="connection-indicator"></div>
+  </div>
+
+  <form id="formChat" class="form-chat">
+    <input type="text" id="inputUsername" placeholder="Nombre de usuario..." required class="chat-input" />
+    <input type="text" id="inputChat" placeholder="Escribe un mensaje..." required class="chat-input" />
+    <button type="submit" class="btn-neon">Enviar</button>
+  </form>
+</div>
+
+<div id="chatBox" class="chat-box glass-panel"></div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  const chatBox = document.getElementById("chatBox");
+  const formChat = document.getElementById("formChat");
+  const inputChat = document.getElementById("inputChat");
+  const inputUsername = document.getElementById("inputUsername");
+
+socket.on("message history", (message) => {
+  message.forEach((dataMessage) => {
+    const colorClass = Math.random() > 0.5 ? "cyan" : "pink";
+    chatBox.innerHTML += `
+      <div class="message-wrapper ${colorClass}">
+        <div class="username">${dataMessage.username}</div>
+        <div class="message-text">${dataMessage.newMessage}</div>
+      </div>
+    `;
+  });
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+});
+
+
+  formChat.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const username = inputUsername.value;
+    const message = inputChat.value;
+    socket.emit("new message", { newMessage: message, username });
+    inputChat.value = ""; // limpiar input
+  });
+
+  socket.on("broadcast new message", (dataMessage) => {
+    const colorClass = Math.random() > 0.5 ? "cyan" : "pink";
+    chatBox.innerHTML += `
+  <div class="message-wrapper ${colorClass}">
+    <div class="username">${dataMessage.username}</div>
+    <div class="message-text">${dataMessage.newMessage}</div>
+  </div>
+`;
+chatBox.scrollTop = chatBox.scrollHeight;
+
+  });
+</script>
